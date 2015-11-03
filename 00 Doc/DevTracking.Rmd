@@ -47,62 +47,61 @@ CREATE TABLE Yearly_Pop_By_Country (
  Country_Code varchar2(4000),
  Indicator_Name varchar2(4000),
  Indicator_Code varchar2(4000),
- X1960 varchar2(4000),
- X1961 varchar2(4000),
- X1962 varchar2(4000),
- X1963 varchar2(4000),
- X1964 varchar2(4000),
- X1965 varchar2(4000),
- X1966 varchar2(4000),
- X1967 varchar2(4000),
- X1968 varchar2(4000),
- X1969 varchar2(4000),
- X1970 varchar2(4000),
- X1971 varchar2(4000),
- X1972 varchar2(4000),
- X1973 varchar2(4000),
- X1974 varchar2(4000),
- X1975 varchar2(4000),
- X1976 varchar2(4000),
- X1977 varchar2(4000),
- X1978 varchar2(4000),
- X1979 varchar2(4000),
- X1980 varchar2(4000),
- X1981 varchar2(4000),
- X1982 varchar2(4000),
- X1983 varchar2(4000),
- X1984 varchar2(4000),
- X1985 varchar2(4000),
- X1986 varchar2(4000),
- X1987 varchar2(4000),
- X1988 varchar2(4000),
- X1989 varchar2(4000),
- X1990 varchar2(4000),
- X1991 varchar2(4000),
- X1992 varchar2(4000),
- X1993 varchar2(4000),
- X1994 varchar2(4000),
- X1995 varchar2(4000),
- X1996 varchar2(4000),
- X1997 varchar2(4000),
- X1998 varchar2(4000),
- X1999 varchar2(4000),
- X2000 varchar2(4000),
- X2001 varchar2(4000),
- X2002 varchar2(4000),
- X2003 varchar2(4000),
- X2004 varchar2(4000),
- X2005 varchar2(4000),
- X2006 varchar2(4000),
- X2007 varchar2(4000),
- X2008 varchar2(4000),
- X2009 varchar2(4000),
- X2010 varchar2(4000),
- X2011 varchar2(4000),
- X2012 varchar2(4000),
- X2013 varchar2(4000),
- X2014 varchar2(4000),
- X2015 varchar2(4000)
+ X1960 number(38,4),
+ X1961 number(38,4),
+ X1962 number(38,4),
+ X1963 number(38,4),
+ X1964 number(38,4),
+ X1965 number(38,4),
+ X1966 number(38,4),
+ X1967 number(38,4),
+ X1968 number(38,4),
+ X1969 number(38,4),
+ X1970 number(38,4),
+ X1971 number(38,4),
+ X1972 number(38,4),
+ X1973 number(38,4),
+ X1974 number(38,4),
+ X1975 number(38,4),
+ X1976 number(38,4),
+ X1977 number(38,4),
+ X1978 number(38,4),
+ X1979 number(38,4),
+ X1980 number(38,4),
+ X1981 number(38,4),
+ X1982 number(38,4),
+ X1983 number(38,4),
+ X1984 number(38,4),
+ X1985 number(38,4),
+ X1986 number(38,4),
+ X1987 number(38,4),
+ X1988 number(38,4),
+ X1989 number(38,4),
+ X1990 number(38,4),
+ X1991 number(38,4),
+ X1992 number(38,4),
+ X1993 number(38,4),
+ X1994 number(38,4),
+ X1995 number(38,4),
+ X1996 number(38,4),
+ X1997 number(38,4),
+ X1998 number(38,4),
+ X1999 number(38,4),
+ X2000 number(38,4),
+ X2001 number(38,4),
+ X2002 number(38,4),
+ X2003 number(38,4),
+ X2004 number(38,4),
+ X2005 number(38,4),
+ X2006 number(38,4),
+ X2007 number(38,4),
+ X2008 number(38,4),
+ X2009 number(38,4),
+ X2010 number(38,4),
+ X2011 number(38,4),
+ X2012 number(38,4),
+ X2013 number(38,4),
+ X2014 number(38,4)
  );
 
 ## 05. Visualizations  
@@ -121,6 +120,23 @@ Comments:
 - China (colored pink in the bar chart), Vietnam's "big brother", has welcomed the largest portion of Vietnamese refugees.
 - The United States (colored blue in the bar chart), also has also taken in quite a number of Vietnamese refugees since 1988. This is interesting considering its involvement in the Vietnam War. (This is 13 years after the war.)
 
+#### Refugees and Country Size
+
+Description: 
+
+Here I attempted a broad survey of asylum-seeking patterns from the perspective of host countries. To accomplish this, I created a calculated field that divided the number of refugees entering a given country in a given year by that country's total population as of 2014. 
+
+![](./Graphics/CViz.png)
+
+Comments:
+
+- We find a notable surge in more refugees entering smaller countries in the late 80's and early 90's, which historically aligns with both the dissolution of the Soviet Union (and the subsequent conflicts in the Balkans) and the start of the Gulf War. Many factors doubtless contribute to refugee movements in both regions, but at the point of surge it is indeed often Middle Eastern and Balkan countries topping the chart.
+
+- Some of the most interesting data in this visualization is contained in the mouseover labels. I've captured one in the above image as an example, but exploring the graph directly will reveal a surprising trend: almost all of the highest outliers in refugees-as-population-percentage are the result of intra-national displacement: that is, in 1993 Bosnia & Herzegovina found more than 1/3 of its own citizens as refugees in its own country. The same is true for all the highest points on Latvia's timeline, Cyprus's, Libera, Timor-Leste's, Sierra Leone's, Lebanon's, and others'. This is consistent with the numerous civil wars erupting in Africa and the Balkans throughout the 1990's.
+
+- Finally, this chart shows a global trend of woefully uneven distribution of refugees and asylum seekers. Obviously the size of a country is not the only determinant in its ability to provide refuge to a particular group, but you'll find no G8 country has ever opened its borders to anywhere near 5% of its population in refugees. The best Western Europe and North America has ever done is Austria in 1951 (the first year of data recorded) at 3.3%
+
+
 ###Origins and Asylum
 
 -In this visualization, I was interested in exploring if there are any trends in where refugees went based on their origin country. I decided to do a case study of two international powers with advanced economies and trustworthy government records: the United States of America and Germany. 
@@ -138,5 +154,5 @@ Comments:
 
 -There are some interesting things we can glean from this information. It appears that the relations between the country of origin and the country of asylum may be important factors in determining if refuges seek official, permanent residence (asylum). A far greater ratio of people from Iran and Iraq saught asylum in Germany than they did in the USA, and the exact oposite it due for those originating in Israel (completely unsuprising statistics).  
 
--A second interesting trend is that people originating on the American continent are equalily likely, if not more likely, to apply for asylum in the USA than they are to simply be refugees (Key examples: Argentina, Brazil, Mexico, Canada, etc etc). However, this trend is NOT consitent in Germany, where there seems to be a random dispersion of Asylum Applicants to refugees from Europe. Countries like England, Spain, and Belgium have almost no records of Asylum seekers. This could be due to the very open borders between those countries, and a relatively small number of catastrophies and conflicts in the region. In almost all of the European cases, the United States had both a higher number of Asylum Seekers, and a higher ratio of Asulum Seekers to Refugees. I'm not sure what to attribpute this to. One could say that those willing to travel to America recognize the difficulty of moving back to their homeland, and therefore apply for perminent residence instead, whereas it is relatively easy to move around in Europe, so they could very easily return home after whatever drove them out ended. However, this is just a theory, and we would need a more through analysis to delve to the bottom of this question.
+-A second interesting trend is that people originating on the American continent are equalily likely, if not more likely, to apply for asylum in the USA than they are to simply be refugees (Key examples: Argentina, Brazil, Mexico, Canada, etc etc). However, this trend is NOT consistent in Germany, where there seems to be a random dispersion of Asylum Applicants to refugees from Europe. Countries like England, Spain, and Belgium have almost no records of Asylum seekers. This could be due to the very open borders between those countries, and a relatively small number of catastrophies and conflicts in the region. In almost all of the European cases, the United States had both a higher number of Asylum Seekers, and a higher ratio of Asulum Seekers to Refugees. I'm not sure what to attribpute this to. One could say that those willing to travel to America recognize the difficulty of moving back to their homeland, and therefore apply for perminent residence instead, whereas it is relatively easy to move around in Europe, so they could very easily return home after whatever drove them out ended. However, this is just a theory, and we would need a more through analysis to delve to the bottom of this question.
 
