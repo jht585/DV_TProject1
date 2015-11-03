@@ -1,5 +1,5 @@
 ---
-title: "DV_RProject3: Refugee Flow
+title: "DV_RProject3: Refugee Flow"
 output: html_document
 ---
 
@@ -36,6 +36,17 @@ output: html_document
 
 ## 06. Visualizations  
 
-###Origin's and Asylum
+###Origins and Asylum
 
 -In this visualization, I was interested in exploring if there are any trends in where refugees went based on their origin country. I decided to do a case study of two international powers with advanced economies and trustworthy government records: the United States of America and Germany. 
+
+-I was only interested in the number of fefugees and the number of people seeking asylum, and I needed these numbers to be seperate for the calculations. I did two seperate SQL statements which mutated the pertinent columns for USA and GER data, and then performed an inner join on this data along the 'Origin_Country' column.
+
+![](./Graphics/tabSQL.png)
+
+-I then created two calculated fields that found the ratio of refugees to people who sought asylum, one for each country. The ratio of these ratios is the KPI I used, and it tells us if refugees were more likely to seek asylum in Germany or the United States. I used this information to create the cross tab displayed below.
+
+![](./Graphics/afg-cuba.png)
+![](./Graphics/cyprus-jamaca.png)
+![](./Graphics/korea-venezuala.png)
+![](./Graphics/vietnam-zimbabwe.png)
