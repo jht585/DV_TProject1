@@ -33,4 +33,9 @@ output: html_document
 
 ### Subset of Dataframe
 
+
 ## 06. Visualizations  
+
+###Origin's and Asylum
+
+-In this visualization, I was interested in exploring if there are any trends in where refugees went based on their origin country. I decided to do a case study of two international powers with advanced economies and trustworthy government records: the United States of America and Germany. 
