@@ -15,9 +15,9 @@ output: html_document
 
 ## 02. Setup RStudio 
  Create three folders in RStudio Project:
-- **00 Doc**: where .Rmd and graphics folder live
-- **01 Data**: where data, csv's will be stored
-- **02 Tableau Visualizations**: Where visualizations are saved  
+- **00 Doc**: where .Rmd and graphics folder live    
+- **01 Data**: where data, csv's will be stored  
+- **02 Tableau Visualizations**: Where visualizations are saved    
 
 ## 03. Download .CSV Files
 
@@ -138,5 +138,5 @@ Comments:
 
 -There are some interesting things we can glean from this information. It appears that the relations between the country of origin and the country of asylum may be important factors in determining if refuges seek official, permanent residence (asylum). A far greater ratio of people from Iran and Iraq saught asylum in Germany than they did in the USA, and the exact oposite it due for those originating in Israel (completely unsuprising statistics).  
 
--A second interesting trend is that people originating on the American continent are equalily likely, if not more likely, to apply for asylum in the USA than they are to simply be refugees (Key examples: Argentina, Brazil, Mexico, Canada, etc etc). However, this trend is NOT consitent in Germany, where there seems to be a random dispersion of Asylum Applicants to refugees from Europe. Countries like England and Spain have almost no 
+-A second interesting trend is that people originating on the American continent are equalily likely, if not more likely, to apply for asylum in the USA than they are to simply be refugees (Key examples: Argentina, Brazil, Mexico, Canada, etc etc). However, this trend is NOT consitent in Germany, where there seems to be a random dispersion of Asylum Applicants to refugees from Europe. Countries like England, Spain, and Belgium have almost no records of Asylum seekers. This could be due to the very open borders between those countries, and a relatively small number of catastrophies and conflicts in the region. In almost all of the European cases, the United States had both a higher number of Asylum Seekers, and a higher ratio of Asulum Seekers to Refugees. I'm not sure what to attribpute this to. One could say that those willing to travel to America recognize the difficulty of moving back to their homeland, and therefore apply for perminent residence instead, whereas it is relatively easy to move around in Europe, so they could very easily return home after whatever drove them out ended. However, this is just a theory, and we would need a more through analysis to delve to the bottom of this question.
 
