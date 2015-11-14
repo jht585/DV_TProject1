@@ -10,8 +10,7 @@ KPI_Medium_Max_value = 1.20
 data_GER <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""select Asylum_Country, Origin_Country, sum(Total_Population) as Tot_Ger, sum(Asylum_Seekers) as Asy_Ger, sum(Refugees) as Ref_Ger from REFUGEE_STATS where Asylum_Country = \\\'Germany\\\' group by Asylum_Country, Origin_Country; """')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON', p1=KPI_Low_Max_value, p2=KPI_Medium_Max_value), verbose = TRUE))); View(data_GER)
 
 #aggregate over the years
-data_GER %>% filter (ASY_GER > -1) %>% View()
-
+data_test <- data_GER %>% select (as.numeric(as.numeric(levels(ASY_GER)[ASY_GER])))
 
 #getting Data for USA
 data_USA <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""select Asylum_Country, Origin_Country, Total_Population as Tot_USA, Asylum_Seekers as Asy_USA, Refugees as Ref_USA from REFUGEE_STATS where Asylum_Country = \\\'United States of America\\\';
