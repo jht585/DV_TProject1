@@ -15,7 +15,7 @@ ggplot() +
   scale_y_continuous() +
   facet_wrap(~CONTINENT) +
   labs(title='Yearly Normalized Refugee Intake By Continent') +
-  labs(x=paste("YEAR"), y=paste("REFUGEES (% of Total Population")) +
+  labs(x=paste("YEAR"), y=paste("REFUGEES (% of Total Population)")) +
   layer(data=by_cont, 
         mapping=aes(x=RECORD_YEAR, y=normal_refs), 
         stat="identity", 
