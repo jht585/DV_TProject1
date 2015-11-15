@@ -17,7 +17,7 @@ data_USA <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.ute
 """')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON', p1=KPI_Low_Max_value, p2=KPI_Medium_Max_value), verbose = TRUE))); 
 
 #join the two tables
-data_all <- dplyr::inner_join(data_GER, data_USA, by = "Origin_Country")
+data_all <- dplyr::inner_join(data_GER, data_USA, by = "ORIGIN_COUNTRY")
 
 #data_USA <- data_USA %>% group_by(ORIGIN_COUNTRY) %>% summarize(total_USA = sum(TOT_USA))
 
