@@ -20,6 +20,8 @@ data_USA <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.ute
 data_all <- dplyr::inner_join(data_GER, data_USA, by = "ORIGIN_COUNTRY")
 
 #data_USA <- data_USA %>% group_by(ORIGIN_COUNTRY) %>% summarize(total_USA = sum(TOT_USA))
+data_final <- data_all %>% select (ORIGIN_COUNTRY, ASY_GER, REF_GER, ASY_USA, REF_USA) %>% filter (as.numeric(as.character(ASY_GER)) > -1, as.numeric(as.character(ASY_USA)) > -1, as.numeric(as.character(REF_GER)) > -1, as.numeric(as.character(REF_USA)) > -1) %>% mutate("ref per as GER" = as.numeric(as.character(REF_GER))/as.numeric(as.character(ASY_GER)), "ref per asy USA" = as.numeric(as.character(REF_USA)) / as.numeric(as.character(ASY_USA)) ) %>% arrange(ORIGIN_COUNTRY) %>% View()
+#get only the rows we care about, and mutate in 
 
 spread(df, COLOR, SUM_PRICE) %>% View
 
@@ -27,18 +29,18 @@ ggplot() +
   coord_cartesian() + 
   scale_x_discrete() +
   scale_y_discrete() +
-  labs(title='Diamonds Crosstab\nSUM_PRICE, SUM_CARAT, SUM_PRICE / SUM_CARAT') +
-  labs(x=paste("COLOR"), y=paste("CLARITY")) +
-  layer(data=df, 
-        mapping=aes(x=COLOR, y=CLARITY, label=SUM_PRICE), 
+  labs(title='Asylum Preference of US vs Germany by Origin') +
+  labs(x=paste("Values"), y=paste("ORIGIN_COUNTRY")) +
+  layer(data=data_final, 
+        mapping=aes(x=as.character(ASY_GER), y=as.character(ORIGIN_COUNTRY), label=as.character(ASY_GER)), 
         stat="identity", 
         stat_params=list(), 
         geom="text",
         geom_params=list(colour="black"), 
         position=position_identity()
   ) +
-  layer(data=df, 
-        mapping=aes(x=COLOR, y=CLARITY, label=SUM_CARAT), 
+  layer(data=data_final, 
+        mapping=aes(x=as.character(REF_GER), y=as.character(ORIGIN_COUNTRY), label=as.character(REF_GER)), 
         stat="identity", 
         stat_params=list(), 
         geom="text",
