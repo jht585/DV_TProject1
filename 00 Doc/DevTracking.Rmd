@@ -172,6 +172,8 @@ Comments:
 
 ###Origins and Asylum
 
+####Tableau
+
 -In this visualization, I was interested in exploring if there are any trends in where refugees went based on their origin country. I decided to do a case study of two international powers with advanced economies and trustworthy government records: the United States of America and Germany. 
 
 -I was only interested in the number of fefugees and the number of people seeking asylum, and I needed these numbers to be seperate for the calculations. I did two seperate SQL statements which mutated the pertinent columns for USA and GER data, and then performed an inner join on this data along the 'Origin_Country' column.
@@ -189,3 +191,152 @@ Comments:
 
 -A second interesting trend is that people originating on the American continent are equalily likely, if not more likely, to apply for asylum in the USA than they are to simply be refugees (Key examples: Argentina, Brazil, Mexico, Canada, etc etc). However, this trend is NOT consistent in Germany, where there seems to be a random dispersion of Asylum Applicants to refugees from Europe. Countries like England, Spain, and Belgium have almost no records of Asylum seekers. This could be due to the very open borders between those countries, and a relatively small number of catastrophies and conflicts in the region. In almost all of the European cases, the United States had both a higher number of Asylum Seekers, and a higher ratio of Asulum Seekers to Refugees. I'm not sure what to attribpute this to. One could say that those willing to travel to America recognize the difficulty of moving back to their homeland, and therefore apply for perminent residence instead, whereas it is relatively easy to move around in Europe, so they could very easily return home after whatever drove them out ended. However, this is just a theory, and we would need a more through analysis to delve to the bottom of this question.
 
+####Work flow in R/SQL
+
+```{r, eval = FALSE}
+require("jsonlite")
+require("RCurl")
+require(ggplot2)
+require(dplyr)
+
+KPI_Low_Max_value = 0.80     
+KPI_Medium_Max_value = 1.20
+
+#getting data for Germany, filter by 
+data_GER <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""select Asylum_Country, Origin_Country, sum(Total_Population) as Tot_Ger, sum(Asylum_Seekers) as Asy_Ger, sum(Refugees) as Ref_Ger from REFUGEE_STATS where Asylum_Country = \\\'Germany\\\' group by Asylum_Country, Origin_Country; """')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON', p1=KPI_Low_Max_value, p2=KPI_Medium_Max_value), verbose = TRUE)));
+
+#getting Data for USA
+data_USA <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""select Asylum_Country, Origin_Country, sum(Total_Population) as Tot_USA, sum(Asylum_Seekers) as Asy_USA, sum(Refugees) as Ref_USA from REFUGEE_STATS where Asylum_Country = \\\'United States of America\\\'group by Asylum_Country, Origin_Country;
+"""')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON', p1=KPI_Low_Max_value, p2=KPI_Medium_Max_value), verbose = TRUE))); 
+
+#join the two tables
+data_all <- dplyr::inner_join(data_GER, data_USA, by = "ORIGIN_COUNTRY")
+
+data_final <- data_all %>% select (ORIGIN_COUNTRY, ASY_GER, REF_GER, ASY_USA, REF_USA) %>% filter (as.numeric(as.character(ASY_GER)) > -1, as.numeric(as.character(ASY_USA)) > -1, as.numeric(as.character(REF_GER)) > -1, as.numeric(as.character(REF_USA)) > -1) %>% mutate("ref_per_asy_GER" = as.numeric(as.character(REF_GER))/as.numeric(as.character(ASY_GER)), "ref_per_asy_USA" = as.numeric(as.character(REF_USA)) / as.numeric(as.character(ASY_USA)) ) %>% arrange(ORIGIN_COUNTRY) %>% filter("ref_per_asy_GER" > -1, "ref_per_asy_USA" > -1) 
+
+#mutate in KPI
+data_final <- data_final %>% mutate (KPI = ifelse((ref_per_asy_GER/ref_per_asy_USA) < KPI_Low_Max_value, "GER", ifelse ((ref_per_asy_GER/ref_per_asy_USA) < KPI_Medium_Max_value, "Neutral", ifelse((ref_per_asy_GER/ref_per_asy_USA) > KPI_Medium_Max_value, "USA", "N/A"))))
+
+spread(df, COLOR, SUM_PRICE) %>% View
+
+ggplot() + 
+  coord_cartesian() + 
+  scale_x_discrete() +
+  scale_y_discrete() +
+  labs(title='Asylum Preference of US vs Germany by Origin') +
+  labs(x=paste("Values"), y=paste("ORIGIN_COUNTRY")) +
+  theme(axis.text.y=element_text(size = 7))+ 
+  theme(axis.text.x=element_text(angle=50, size=10, vjust=0.5))+
+  layer(data=data_final, 
+        mapping=aes(x="ASY_GER", y=as.character(ORIGIN_COUNTRY), label=as.character(ASY_GER)), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="text",
+        geom_params=list(colour="black", size=2), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="REF_GER", y=as.character(ORIGIN_COUNTRY), label=as.character(REF_GER)), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="text",
+        geom_params=list(colour="black", size = 2), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ASY_USA", y=as.character(ORIGIN_COUNTRY), label=as.character(ASY_USA)), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="text",
+        geom_params=list(colour="black", size = 2), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="REF_USA", y=as.character(ORIGIN_COUNTRY), label=as.character(REF_USA)), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="text",
+        geom_params=list(colour="black", size = 2), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ASY_USA", y=as.character(ORIGIN_COUNTRY), label=as.character(ASY_USA)), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="text",
+        geom_params=list(colour="black", size = 2), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ref per asy GER", y=as.character(ORIGIN_COUNTRY), label=as.character(round(ref_per_asy_GER))), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="text",
+        geom_params=list(colour="black", size = 2), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ref per asy USA", y=as.character(ORIGIN_COUNTRY), label=as.character(round(ref_per_asy_USA))), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="text",
+        geom_params=list(colour="black", size = 2), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ASY_GER", y=as.character(ORIGIN_COUNTRY), fill=KPI), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="tile",
+        geom_params=list(alpha=0.50), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ASY_USA", y=as.character(ORIGIN_COUNTRY), fill=KPI), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="tile",
+        geom_params=list(alpha=0.50), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="REF_GER", y=as.character(ORIGIN_COUNTRY), fill=KPI), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="tile",
+        geom_params=list(alpha=0.50), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="REF_USA", y=as.character(ORIGIN_COUNTRY), fill=KPI), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="tile",
+        geom_params=list(alpha=0.50), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ref per asy GER", y=as.character(ORIGIN_COUNTRY), fill=KPI), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="tile",
+        geom_params=list(alpha=0.50), 
+        position=position_identity()
+  ) +
+  layer(data=data_final, 
+        mapping=aes(x="ref per asy USA", y=as.character(ORIGIN_COUNTRY), fill=KPI), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="tile",
+        geom_params=list(alpha=0.50), 
+        position=position_identity()
+  )
+```
+
+
+-The Visualization in R:  
+![]./Graphics/jamesVis
+
+-Of interesting note, the values shown here are very different than those seen in Tableau. Upon investigation, we see that Tableau has some something very strange with the data. For instance, Germany revieced a total of 2 asylum seekers from Australia since these data points were recorded. This is corroberated both in the R-visualization, and in the Oracle Database. However, in tableau, this value increases to 20 Asylum seekers, for no apparent reason. I suspect there was a problem with the join I performed on the data in Tableau.   
+
+-That being said, the trends we see in Tableau are largely still valid in the R data. Unsuprisingly, places where the US has tensions with, such as the Russian Federation, Iraq, and Afghanista, have a lower ratio of refugees per asylum seekers in Germany than in Russia. And we observe, once again, that South American Countries have a very small ratio of refugees per asylum seekers.  
