@@ -335,7 +335,7 @@ ggplot() +
 
 
 -The Visualization in R:  
-![]./Graphics/jamesVis
+![](./Graphics/jamesVis.png)
 
 -Of interesting note, the values shown here are very different than those seen in Tableau. Upon investigation, we see that Tableau has some something very strange with the data. For instance, Germany revieced a total of 2 asylum seekers from Australia since these data points were recorded. This is corroberated both in the R-visualization, and in the Oracle Database. However, in tableau, this value increases to 20 Asylum seekers, for no apparent reason. I suspect there was a problem with the join I performed on the data in Tableau.   
 
