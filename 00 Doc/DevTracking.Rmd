@@ -106,7 +106,7 @@ CREATE TABLE Yearly_Pop_By_Country (
 
 ## 05. Visualizations  
 
-#### Visualization: A Look at Migration Out of Vietnam
+### Visualization: A Look at Migration Out of Vietnam
 
 Description: 
 
@@ -153,7 +153,7 @@ p1
 
 ![](./Graphics/QVisual_SQLR.png)
 
-#### Refugees and Country Size
+### Refugees and Country Size
 
 Description: 
 
@@ -169,6 +169,35 @@ Comments:
 
 - Finally, this chart shows a global trend of woefully uneven distribution of refugees and asylum seekers. Obviously the size of a country is not the only determinant in its ability to provide refuge to a particular group, but you'll find no G8 country has ever opened its borders to anywhere near 5% of its population in refugees. The best Western Europe and North America has ever done is Austria in 1951 (the first year of data recorded) at 3.3%
 
+#### Reproduced in SQL/R
+
+```{R, echo = FALSE, warning = FALSE}
+require("jsonlite")
+require("RCurl")
+require(ggplot2)
+require(dplyr)
+
+df <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""SELECT asylum_country, record_year, (all_refugees / current_pop * 100) normalized_refugees FROM (SELECT asylum_country, record_year, SUM(total_population) all_refugees,
+x2014 current_pop FROM (select * from REFUGEE_STATS LEFT JOIN (select cname, continent_code from COUNTRIES) co ON co.cname = REFUGEE_STATS.asylum_country WHERE (REFUGEE_STATS.asylum_country != \\\'Various/Unknown\\\')) refs INNER JOIN (select * from YEARLY_POP_BY_COUNTRY_NUMERIC) pops ON pops.country_name = refs.asylum_country GROUP BY asylum_country, record_year, x2014);"""')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE))); View(df)
+
+df <- df %>% filter(NORMALIZED_REFUGEES > 3)
+
+
+ggplot() + 
+  coord_cartesian() + 
+  scale_x_continuous() +
+  scale_y_continuous() +
+  labs(title='Refugee Influxes Over Time, Normalized for Host Populations') +
+  labs(x=paste("Year"), y=paste("Yearly Refugee Influx as % of Host Population")) +
+  layer(data=df, 
+        mapping=aes(x=RECORD_YEAR, y=NORMALIZED_REFUGEES, color=ASYLUM_COUNTRY), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="line",
+        geom_params=list(), 
+        position=position_identity(),
+  )
+```
 
 ###Origins and Asylum
 
@@ -340,3 +369,34 @@ ggplot() +
 -Of interesting note, the values shown here are very different than those seen in Tableau. Upon investigation, we see that Tableau has some something very strange with the data. For instance, Germany revieced a total of 2 asylum seekers from Australia since these data points were recorded. This is corroberated both in the R-visualization, and in the Oracle Database. However, in tableau, this value increases to 20 Asylum seekers, for no apparent reason. I suspect there was a problem with the join I performed on the data in Tableau.   
 
 -That being said, the trends we see in Tableau are largely still valid in the R data. Unsuprisingly, places where the US has tensions with, such as the Russian Federation, Iraq, and Afghanista, have a lower ratio of refugees per asylum seekers in Germany than in Russia. And we observe, once again, that South American Countries have a very small ratio of refugees per asylum seekers.  
+
+## 06. Blended Data Visualization
+
+```{R, echo = FALSE, warning = FALSE}
+require("jsonlite")
+require("RCurl")
+require(ggplot2)
+require(dplyr)
+
+by_cont <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""SELECT * FROM (SELECT tot_pop, continents.NAME continent FROM CONTINENTS INNER JOIN (SELECT SUM(X2014) tot_pop, continent_code FROM YEARLY_POP_BY_COUNTRY_NUMERIC INNER JOIN COUNTRIES ON COUNTRIES.iso3 = YEARLY_POP_BY_COUNTRY_NUMERIC.country_code GROUP BY continent_code) cont_pop ON continents.code = cont_pop.continent_code) sum_pop FULL JOIN (select record_year, SUM(total_population) all_refugees, continents.NAME continent FROM ((SELECT * FROM REFUGEE_STATS LEFT JOIN (SELECT cname, continent_code from COUNTRIES) co ON co.cname = REFUGEE_STATS.asylum_country WHERE REFUGEE_STATS.asylum_country != \\\'Various/Unknown\\\') refs INNER JOIN (SELECT * FROM YEARLY_POP_BY_COUNTRY_NUMERIC) pops ON pops.country_name = refs.asylum_country) LEFT JOIN continents ON continents.CODE = refs.continent_code GROUP BY record_year, continents.NAME) rest ON rest.continent = sum_pop.continent WHERE tot_pop > 0;"""')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE))); View(by_cont)
+
+str(by_cont)
+
+by_cont %>% mutate(normal_refs = ALL_REFUGEES / TOT_POP * 100) -> by_cont
+
+ggplot() + 
+  coord_cartesian() + 
+  scale_x_continuous() +
+  scale_y_continuous() +
+  facet_wrap(~CONTINENT) +
+  labs(title='Yearly Normalized Refugee Intake By Continent') +
+  labs(x=paste("YEAR"), y=paste("REFUGEES (% of Total Population)")) +
+  layer(data=by_cont, 
+        mapping=aes(x=RECORD_YEAR, y=normal_refs), 
+        stat="identity", 
+        stat_params=list(), 
+        geom="bar",
+        geom_params=list(colour="blue"), 
+        position=position_identity()
+  )
+```
