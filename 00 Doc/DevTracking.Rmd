@@ -431,6 +431,12 @@ ggplot() +
   )
 ```
 
+And again in Tableau:
+
+
+![](./Graphics/tableau_blend.png)
+
+
 - Oceania here takes a surprising lead in refugee-haboring. Despite the largest single-country intakes generally occuring in Europe and (to a lesser extent) North Africa in the 90's, this wider view shows that the vast populations and the large number of non- or slightly-hosting countries on those continents did much to lower the average. Not so in Oceania, the least-populous (barring Antarctica, which was omitted) continent with the fewest individual countries
 
 - That only deepens the question of South America's post-2000 surge, however, which is only apparent at the continent level. What happened there? All we can tell from this data is that South America had a rush of refugees in the 2000's that was not wholly inconsistent with peak refugee crises on other continents, but must have been more evenly spread across individual countries, as South American countries have shown little distinction in the previous nation-level analyses.
