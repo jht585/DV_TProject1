@@ -161,27 +161,18 @@ Here I attempted a broad survey of asylum-seeking patterns from the perspective 
 
 ![](./Graphics/CViz.png)
 
-Comments:
+Here is the same, created with R and SQL joins:
 
-- We find a notable surge in more refugees entering smaller countries in the late 80's and early 90's, which historically aligns with both the dissolution of the Soviet Union (and the subsequent conflicts in the Balkans) and the start of the Gulf War. Many factors doubtless contribute to refugee movements in both regions, but at the point of surge it is indeed often Middle Eastern and Balkan countries topping the chart.
-
-- Some of the most interesting data in this visualization is contained in the mouseover labels. I've captured one in the above image as an example, but exploring the graph directly will reveal a surprising trend: almost all of the highest outliers in refugees-as-population-percentage are the result of intra-national displacement: that is, in 1993 Bosnia & Herzegovina found more than 1/3 of its own citizens as refugees in its own country. The same is true for all the highest points on Latvia's timeline, Cyprus's, Libera, Timor-Leste's, Sierra Leone's, Lebanon's, and others'. This is consistent with the numerous civil wars erupting in Africa and the Balkans throughout the 1990's.
-
-- Finally, this chart shows a global trend of woefully uneven distribution of refugees and asylum seekers. Obviously the size of a country is not the only determinant in its ability to provide refuge to a particular group, but you'll find no G8 country has ever opened its borders to anywhere near 5% of its population in refugees. The best Western Europe and North America has ever done is Austria in 1951 (the first year of data recorded) at 3.3%
-
-#### Reproduced in SQL/R
-
-```{R, echo = FALSE, warning = FALSE}
+```{R}
 require("jsonlite")
 require("RCurl")
 require(ggplot2)
 require(dplyr)
 
 df <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""SELECT asylum_country, record_year, (all_refugees / current_pop * 100) normalized_refugees FROM (SELECT asylum_country, record_year, SUM(total_population) all_refugees,
-x2014 current_pop FROM (select * from REFUGEE_STATS LEFT JOIN (select cname, continent_code from COUNTRIES) co ON co.cname = REFUGEE_STATS.asylum_country WHERE (REFUGEE_STATS.asylum_country != \\\'Various/Unknown\\\')) refs INNER JOIN (select * from YEARLY_POP_BY_COUNTRY_NUMERIC) pops ON pops.country_name = refs.asylum_country GROUP BY asylum_country, record_year, x2014);"""')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE))); View(df)
+x2014 current_pop FROM (select * from REFUGEE_STATS LEFT JOIN (select cname, continent_code from COUNTRIES) co ON co.cname = REFUGEE_STATS.asylum_country WHERE (REFUGEE_STATS.asylum_country != \\\'Various/Unknown\\\')) refs INNER JOIN (select * from YEARLY_POP_BY_COUNTRY_NUMERIC) pops ON pops.country_name = refs.asylum_country GROUP BY asylum_country, record_year, x2014);"""')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE)));
 
-df <- df %>% filter(NORMALIZED_REFUGEES > 3)
-
+df %>% filter(NORMALIZED_REFUGEES > 3) -> df
 
 ggplot() + 
   coord_cartesian() + 
@@ -197,7 +188,17 @@ ggplot() +
         geom_params=list(), 
         position=position_identity(),
   )
+
 ```
+
+Comments:
+
+- We find a notable surge in more refugees entering smaller countries in the late 80's and early 90's, which historically aligns with both the dissolution of the Soviet Union (and the subsequent conflicts in the Balkans) and the start of the Gulf War. Many factors doubtless contribute to refugee movements in both regions, but at the point of surge it is indeed often Middle Eastern and Balkan countries topping the chart.
+
+- Some of the most interesting data in this visualization is contained in the mouseover labels. I've captured one in the above image as an example, but exploring the graph directly will reveal a surprising trend: almost all of the highest outliers in refugees-as-population-percentage are the result of intra-national displacement: that is, in 1993 Bosnia & Herzegovina found more than 1/3 of its own citizens as refugees in its own country. The same is true for all the highest points on Latvia's timeline, Cyprus's, Libera, Timor-Leste's, Sierra Leone's, Lebanon's, and others'. This is consistent with the numerous civil wars erupting in Africa and the Balkans throughout the 1990's.
+
+- Finally, this chart shows a global trend of woefully uneven distribution of refugees and asylum seekers. Obviously the size of a country is not the only determinant in its ability to provide refuge to a particular group, but you'll find no G8 country has ever opened its borders to anywhere near 5% of its population in refugees. The best Western Europe and North America has ever done is Austria in 1951 (the first year of data recorded) at 3.3%
+
 
 ###Origins and Asylum
 
@@ -370,17 +371,46 @@ ggplot() +
 
 -That being said, the trends we see in Tableau are largely still valid in the R data. Unsuprisingly, places where the US has tensions with, such as the Russian Federation, Iraq, and Afghanista, have a lower ratio of refugees per asylum seekers in Germany than in Russia. And we observe, once again, that South American Countries have a very small ratio of refugees per asylum seekers.  
 
-## 06. Blended Data Visualization
+###BLENDING: A Macro View
 
-```{R, echo = FALSE, warning = FALSE}
+Here we looked at refugee influxes, but from the perspective of entire continents instead of individual host countries. To acquire this information, we combined our original data with a reference table of countries' respective continents, like so:
+
+```
+SELECT * FROM 
+(SELECT tot_pop, continents.NAME continent FROM CONTINENTS 
+INNER JOIN 
+(SELECT SUM(X2014) tot_pop, continent_code FROM YEARLY_POP_BY_COUNTRY_NUMERIC 
+INNER JOIN COUNTRIES 
+ON COUNTRIES.iso3 = YEARLY_POP_BY_COUNTRY_NUMERIC.country_code 
+GROUP BY continent_code) cont_pop 
+ON continents.code = cont_pop.continent_code) sum_pop 
+FULL JOIN 
+(select record_year, SUM(total_population) all_refugees, continents.NAME continent 
+FROM 
+((SELECT * FROM REFUGEE_STATS 
+LEFT JOIN 
+(SELECT cname, continent_code from COUNTRIES) co 
+ON co.cname = REFUGEE_STATS.asylum_country 
+WHERE REFUGEE_STATS.asylum_country != 'Various/Unknown') refs 
+INNER JOIN 
+(SELECT * FROM YEARLY_POP_BY_COUNTRY_NUMERIC) pops 
+ON pops.country_name = refs.asylum_country) 
+LEFT JOIN continents 
+ON continents.CODE = refs.continent_code 
+GROUP BY record_year, continents.NAME) rest 
+ON rest.continent = sum_pop.continent 
+WHERE tot_pop > 0;
+```
+
+The results:
+
+```{R, echo=FALSE}
 require("jsonlite")
 require("RCurl")
 require(ggplot2)
 require(dplyr)
 
-by_cont <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""SELECT * FROM (SELECT tot_pop, continents.NAME continent FROM CONTINENTS INNER JOIN (SELECT SUM(X2014) tot_pop, continent_code FROM YEARLY_POP_BY_COUNTRY_NUMERIC INNER JOIN COUNTRIES ON COUNTRIES.iso3 = YEARLY_POP_BY_COUNTRY_NUMERIC.country_code GROUP BY continent_code) cont_pop ON continents.code = cont_pop.continent_code) sum_pop FULL JOIN (select record_year, SUM(total_population) all_refugees, continents.NAME continent FROM ((SELECT * FROM REFUGEE_STATS LEFT JOIN (SELECT cname, continent_code from COUNTRIES) co ON co.cname = REFUGEE_STATS.asylum_country WHERE REFUGEE_STATS.asylum_country != \\\'Various/Unknown\\\') refs INNER JOIN (SELECT * FROM YEARLY_POP_BY_COUNTRY_NUMERIC) pops ON pops.country_name = refs.asylum_country) LEFT JOIN continents ON continents.CODE = refs.continent_code GROUP BY record_year, continents.NAME) rest ON rest.continent = sum_pop.continent WHERE tot_pop > 0;"""')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE))); View(by_cont)
-
-str(by_cont)
+by_cont <- data.frame(fromJSON(getURL(URLencode(gsub("\n", " ", 'skipper.cs.utexas.edu:5001/rest/native/?query="""SELECT * FROM (SELECT tot_pop, continents.NAME continent FROM CONTINENTS INNER JOIN (SELECT SUM(X2014) tot_pop, continent_code FROM YEARLY_POP_BY_COUNTRY_NUMERIC INNER JOIN COUNTRIES ON COUNTRIES.iso3 = YEARLY_POP_BY_COUNTRY_NUMERIC.country_code GROUP BY continent_code) cont_pop ON continents.code = cont_pop.continent_code) sum_pop FULL JOIN (select record_year, SUM(total_population) all_refugees, continents.NAME continent FROM ((SELECT * FROM REFUGEE_STATS LEFT JOIN (SELECT cname, continent_code from COUNTRIES) co ON co.cname = REFUGEE_STATS.asylum_country WHERE REFUGEE_STATS.asylum_country != \\\'Various/Unknown\\\') refs INNER JOIN (SELECT * FROM YEARLY_POP_BY_COUNTRY_NUMERIC) pops ON pops.country_name = refs.asylum_country) LEFT JOIN continents ON continents.CODE = refs.continent_code GROUP BY record_year, continents.NAME) rest ON rest.continent = sum_pop.continent WHERE tot_pop > 0;"""')), httpheader=c(DB='jdbc:oracle:thin:@sayonara.microlab.cs.utexas.edu:1521:orcl', USER='C##cs329e_cjs2599', PASS='orcl_cjs2599', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE)));
 
 by_cont %>% mutate(normal_refs = ALL_REFUGEES / TOT_POP * 100) -> by_cont
 
@@ -400,3 +430,7 @@ ggplot() +
         position=position_identity()
   )
 ```
+
+- Oceania here takes a surprising lead in refugee-haboring. Despite the largest single-country intakes generally occuring in Europe and (to a lesser extent) North Africa in the 90's, this wider view shows that the vast populations and the large number of non- or slightly-hosting countries on those continents did much to lower the average. Not so in Oceania, the least-populous (barring Antarctica, which was omitted) continent with the fewest individual countries
+
+- That only deepens the question of South America's post-2000 surge, however, which is only apparent at the continent level. What happened there? All we can tell from this data is that South America had a rush of refugees in the 2000's that was not wholly inconsistent with peak refugee crises on other continents, but must have been more evenly spread across individual countries, as South American countries have shown little distinction in the previous nation-level analyses.
